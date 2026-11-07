@@ -1,9 +1,9 @@
 {
-  "name": "code-reviewer",
-  "description": "Reviews a small code change and lists the real problems in it, as JSON.",
+  "name": "evidence-triage",
+  "description": "Triage recorded security observations from fictional, offline fixtures.",
   "model": {
     "name": "anthropic/claude-sonnet-4-6",
-    "params": { "temperature": 0 }
+    "params": { "temperature": 0, "maxTokens": 1024 }
   },
-  "skill_mode": "inline"
+  "skill_mode": "git"
 }

@@ -9,17 +9,25 @@ run the evals ──► score ──► the agent rewrites its own instructions/
    (TrueForge session)         (from its failures, committed with Agent-Session: <id>)
 ```
 
-The example agent is a **code reviewer**: it reads a small code change and lists the real problems in it as JSON. Its playbook is a `review-checklist` skill that starts short on purpose. Swap in your own agent and tasks; keep the loop.
+The example agent triages **recorded security evidence** in seven compact, fictional offline cases. It classifies each case as `confirmed_vulnerable` or `unconfirmed`, then cites evidence IDs for categorized findings. The cases are curated fixtures, not scanner runs; no live scanning or exploit code is used. One case is held out from improvement.
 
 ## Run 1 vs run N
 
 > Fill this in at the end. Five lines max. Keep the heading: the challenge checks for it.
 
-- **Task and score:** _e.g. review 4 small code changes; score = 100 × mean(issues caught − 0.5 × noise comments) per task._
-- **Run 1 → run N:** _e.g. 50 → 91.67 (`runs/summary.csv`)._
+- **Task and score:** Triage seven fictional recorded-evidence cases. Wrong verdict scores 0; correct verdict scores 0.4 + 0.6 × exact category/citation-set F1. Pass requires exact verdict and finding set.
+- **Run 1 → run N:** _not measured; no official evaluation has run._
 - **The change that did it:** _link to the commit with `Agent-Session:`._
-- **What the agent learned:** _one sentence, e.g. "it only checked 3 kinds of bugs; it now also checks mutable defaults, unawaited async callbacks, N+1 queries, leaks and logged secrets."_
-- **What still fails:** _e.g. the holdout task's inverted range check (`||` vs `&&`)._
+- **What the agent learned:** _not measured._
+- **What still fails:** _not measured; the sixth fixture is held out from improvement._
+
+## Shelled handoff
+
+The replay artifacts and stable schema for the Shelled UI are here:
+
+- [Replay contract](docs/replay-contract.md)
+- [Synthetic perfect example](examples/replay-synthetic.json)
+- [Synthetic partial example](examples/replay-partial-synthetic.json)
 
 ## What the challenge asks
 
@@ -38,17 +46,20 @@ The rule: **the agent writes the change.** You can review it, keep it or drop it
 agent/
   agent.json                      name, description, model, skill_mode (inline | git)
   instructions.md                 the agent's instructions (its system prompt)
-  skills/review-checklist/SKILL.md  its playbook, the part it rewrites most
+  skills/review-checklist/SKILL.md  initial triage playbook; the agent may revise it
 evals/
-  tasks/*.json                    the fixed task set (04 is a holdout: scored, never shown to improve)
-  score.ts                        deterministic scorer → one number, higher is better
+  tasks/*.json                    seven fixed cases (one holdout is scored, never shown to improve)
+  contract.ts                     task loader, model-visible prompt, validator and fingerprint
+  score.ts                        deterministic verdict/finding scorer
+  replay.ts                       stable replay export shape for run data and synthetic examples
 scripts/
   setup.ts                        create/update the TrueForge agent from agent/
   run-evals.ts                    one run = one TrueForge session; scores it, saves runs/run-NN/, adds a row to summary.csv
-  improve.ts                      the agent reads its failed run and rewrites agent/; commits with Agent-Session
+  improve.ts                      the agent reads failed training cases and revises only existing agent files
   export-session.ts               save any TrueForge session (session, turns, events) as JSON
   lib.ts                          shared helpers (TrueForge SDK client, git, files)
 runs/summary.csv                  one row per run
+examples/replay-*.json            clearly marked synthetic UI examples, generated through the scorer
 ```
 
 ## Quickstart (about 5 minutes)
@@ -69,15 +80,15 @@ Open http://localhost:8790 → **Settings → Models** → pick your provider �
 
 ```bash
 npm install
-cp .env.example .env
-# set TF_MODEL=provider/model in .env if it isn't anthropic/claude-sonnet-4-6
+# Set TF_MODEL and SKILL_REPO_URL in your ignored .env file.
+# If .env already exists, edit it in place; do not replace it.
 ```
 
 **3. Create the agent:**
 
 ```bash
 npm run setup
-# ✓ Agent "code-reviewer" (...) is in sync with agent/ at 1a2b3c4
+# ✓ Agent "evidence-triage" (...) is in sync with agent/ at 1a2b3c4
 ```
 
 It's now under **Agents** in the TrueForge UI; click **Try** to chat with it.
@@ -86,14 +97,14 @@ It's now under **Agents** in the TrueForge UI; click **Try** to chat with it.
 
 ```bash
 npm run run-evals
-# Run 01: agent "code-reviewer" at 1a2b3c4, 4 tasks
-#   01-python-utils          0.67
-#   ...
-# Run 01 score: 50 (0/4 tasks passed, 5414 tokens)
+# Run 01: agent "evidence-triage" at 1a2b3c4, 7 tasks
+#   case-k7m2                <score>
+#   ... (one line per case)
+# Run 01 score: ... (..../7 tasks passed, ... tokens)
 # ✓ Committed runs/run-01. Next: npm run improve
 ```
 
-After run 1, **don't change `evals/` again.** Same tasks, same scorer, every run.
+After run 1, **don't change the fixed task/scorer/prompt contract.** The run script records its SHA-256 and rejects later runs if it changes. Each run writes the fingerprint to score/session metadata; the existing summary.csv columns stay unchanged.
 
 **5. Let the agent improve itself, then run again:**
 
@@ -115,13 +126,14 @@ Repeat as often as you like. Then fill in **Run 1 vs run N** above, and push.
    - `runs/run-NN/results.json`: each reply and its score details
    - `runs/run-NN/score.json`: the run's numbers
    - `runs/run-NN/session.json`: the session, its turns and every event, from TrueForge
+   - `runs/run-NN/replay.json`: UI replay records with observations, parsed findings, scorer diagnostics and source IDs
    - a new row in `runs/summary.csv`: `run, session_id, agent_commit, score, date_utc, tasks_passed, tasks_total, tokens, tool_calls, duration_s`
 5. Commits `runs/` as `run NN: score X` (skip with `--no-commit`).
 
 **`npm run improve`** (options: `--run NN`, `--coach`, `--no-commit`)
-1. Takes the failed tasks from the last run (never the holdout ones), with the scorer's feedback: what was missed, what was noise.
+1. Takes failed training cases from the last run (the holdout is derived from the current task definition and excluded). It provides the agent's prior response and aggregate scorer diagnostics, but not expected categories, evidence IDs, or rationale.
 2. Opens a TrueForge session **with the agent itself** and asks it for new versions of its files. With `--coach`, a separate inline TrueForge "coach" agent on the same model writes them instead (allowed: "the agent, or a TrueForge agent coaching it").
-3. Checks the answer: only `agent/instructions.md` and `agent/skills/*/SKILL.md` may change; skills keep their frontmatter; the JSON output format stays; and the new text **must not quote the eval tasks** (task ids, file names, the buggy lines), so the agent learns rules, not answers.
+3. Checks the answer: only existing instruction/skill files may change; skills keep their frontmatter; the output protocol stays exact; and fixture IDs, titles, targets and observation text may not be copied into the playbook.
 4. Writes the files, saves the improve session to `runs/run-NN/improve-session.json`, and commits:
 
    ```
@@ -134,7 +146,15 @@ Repeat as often as you like. Then fill in **Run 1 vs run N** above, and push.
 
 **`npm run export-session -- <session_id> [out.json]`**: any session as JSON (e.g. one you ran in the UI). TrueForge has no export button yet; this pages through `sessions.get`, `sessions.listTurns` and `sessions.listTurnEvents`.
 
-**`npm run score -- runs/run-NN`** re-scores a saved run. **`npm run score -- --selftest`** checks the scorer on perfect, empty and noisy answers.
+**`npm run score -- runs/run-NN`** re-scores a saved run. **`npm run score -- --selftest`** checks the scorer. Offline checks: `npm run evals:validate`, `npm run evals:test`, and `npm run replay:example`.
+
+Score formula: a wrong verdict earns zero. A correct verdict earns `0.4 + 0.6 × F1`, where a finding matches only when category and the full supporting evidence ID set match exactly. Extra, duplicate, and incorrectly cited findings reduce precision; missed findings reduce recall. A pass requires correct verdict and the exact finding set. The scorer checks structured labels and citations, not the truth or quality of a free-text explanation, so scores are a limited proxy for triage quality.
+
+`agent/agent.json` caps completions at 1,024 tokens; the runtime also has a four-iteration limit. Keep the playbook and responses short. The contract fingerprint covers task JSON, task/prompt code, and scorer code; it does not fingerprint the model, environment variables, or the TrueForge runtime configuration.
+
+`npm run replay:example` generates perfect and partial **synthetic** records for the Shelled UI contract from a fixed fixture and the same scorer. They use `synthetic: true`, with `run_id` and `session_id` set to `null`; they are not measured runs.
+
+See [docs/replay-contract.md](docs/replay-contract.md) for the replay JSON schema and field meanings.
 
 ## Make it yours
 
@@ -142,9 +162,9 @@ Pick your task and your scorer **before run 1**; after run 1 they're frozen.
 
 - **The agent:** edit `agent/agent.json` (name, model), `agent/instructions.md` and the skill. Rename or add skills under `agent/skills/<name>/SKILL.md`.
 - **The tasks:** put 3 or more in `evals/tasks/*.json` (5+ makes your score harder to argue with). Mark one or two `"holdout": true`: they count in the score, but `improve` never shows them to the agent. If the holdout score goes up too, the agent learned something general.
-- **The prompt per task:** `taskPrompt()` in `scripts/lib.ts`.
+- **The prompt per task:** `taskPrompt()` in `evals/contract.ts`.
 - **The scorer:** `evals/score.ts`. It must give **one number, higher is better**: tasks passed, a checker, tests, a judge prompt. Want to measure "cheaper"? Use tasks solved per 1,000 tokens (`score.json` has the tokens).
-- **The improve prompt:** in `scripts/improve.ts`. Its overfitting guard is tuned for this example; adapt it to your tasks.
+- **The improve prompt:** in `scripts/improve.ts`; its guard allows only existing agent files and rejects fixture memorization.
 
 Some ideas from the challenge brief: a PR reviewer that sharpens its checklist; issue → PR with memory (run tests in the sandbox); an overnight janitor on a TrueForge schedule; subagents that coach each other; the cheaper agent.
 
@@ -160,15 +180,6 @@ Some ideas from the challenge brief: a PR reviewer that sharpens its checklist; 
 
 The challenge asks you to use **two or more** of: skills, subagents, MCP tools, the sandbox, schedules, human checkpoints, the SDK. This starter already uses the SDK; `git` mode adds skills and the sandbox. Subagents are on by default in TrueForge agents.
 
-### Local or open models
-
-Any OpenAI-compatible endpoint works as a `custom` provider (**Settings → Models → Add custom provider**). If it runs on your own machine (Ollama, vLLM, LM Studio), TrueForge blocks private addresses by default; start it with your host allowed:
-
-```bash
-OUTBOUND_URL_ALLOWED_HOSTS='["127.0.0.1"]' npx @truefoundry/trueforge@latest
-```
-
-and use `http://127.0.0.1:<port>/v1` as the base URL.
 
 ## What the judges check
 
@@ -191,14 +202,11 @@ You also send: a video (up to 2 minutes), three lines (what it does, how it uses
 - **`skills require a sandbox provider`** in `git` mode: see *Skills and the sandbox*.
 - **The model rejects `temperature`** (some reasoning models do): remove `params` in `agent/agent.json`.
 
-## Status of this starter (v0)
+## Configuration and status
 
-Built against TrueForge `@truefoundry/trueforge` 0.180.0 and `@truefoundry/trueforge-sdk` 0.180.0 (23 Oct 2026).
+Choose a model already configured in TrueForge and set `TF_MODEL` to its exact `provider/model` name. Set `SKILL_REPO_URL` to the public repository URL required for git-backed skills. Both values belong in the ignored `.env` file. If `.env` already exists, edit it in place and preserve its other values.
 
-- Tested end to end against a real local TrueForge server (npx, local mode) with a **mock** OpenAI-compatible model: `setup`, `run-evals` (run 1), `improve` (commit with `Agent-Session:`), `run-evals` (run 2), `export-session`, `score`. Not yet run with a real model key.
-- TODO(verify): `skill_mode: "git"` end to end. Skill registration (`settings.skills.createOrUpdate`) is accepted by the server; running the skill needs a sandbox, which our test machine didn't have. See https://trueforge.dev/skills and https://trueforge.dev/sandbox.
-- TODO(verify): the local sandbox on macOS needs no extra packages (from TrueForge's source, `packages/trueforge/src/sandbox/local`; not in the docs yet).
-- TODO: a scheduled variant (TrueForge [schedules](https://trueforge.dev/schedules)) that runs the evals nightly.
+The task/scorer/replay foundation has offline validation and tests. It has **not** run an official security-evidence evaluation or an improvement cycle; there is no measured before/after score. Git-backed skills also require a working TrueForge sandbox.
 
 ## Contributing
 

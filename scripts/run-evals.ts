@@ -11,6 +11,8 @@
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { scoreRun, scoreTask } from "../evals/score.ts";
+import { contractFingerprint } from "../evals/contract.ts";
+import { replayRun } from "../evals/replay.ts";
 import {
   client,
   die,
@@ -43,18 +45,27 @@ const rows = readFileSync(SUMMARY_CSV, "utf8").trim().split("\n").slice(1).filte
 const run = rows.length + 1;
 const dir = runDir(run);
 const nn = String(run).padStart(2, "0");
+const tasks = loadTasks();
+const contractHash = contractFingerprint();
+const firstRunPath = join(runDir(1), "score.json");
+if (rows.length > 0 && !existsSync(firstRunPath)) die("summary.csv already has a run but run 01 has no score fingerprint; refusing to assume the fixed contract is unchanged.");
+if (existsSync(firstRunPath)) {
+  const first = JSON.parse(readFileSync(firstRunPath, "utf8")) as { contract_sha256?: string };
+  if (!first.contract_sha256 || first.contract_sha256 !== contractHash) {
+    die("The task/scorer/prompt contract differs from run 01 or run 01 has no fingerprint. Do not change the fixed contract after baseline.");
+  }
+}
 
 // 2. Make the TrueForge agent match agent/ at this commit.
 const tf = client();
 const agent = await syncAgent(tf, headSha());
-const tasks = loadTasks();
 console.log(`Run ${nn}: agent "${agent.name}" at ${agentCommit.slice(0, 7)}, ${tasks.length} tasks`);
 
 // 3. One session for the whole run. https://trueforge.dev/api/overview#session
 const started = Date.now();
 const { data: session } = await tf.sessions.create({
   agent: { name: readAgent().agent.name },
-  metadata: { purpose: "eval", run: nn, agent_commit: agentCommit },
+  metadata: { purpose: "eval", run: nn, agent_commit: agentCommit, contract_sha256: contractHash },
 });
 await tf.sessions.update(session.id, { title: `eval run ${nn} @ ${agentCommit.slice(0, 7)}` });
 console.log(`  session ${session.id}`);
@@ -75,8 +86,9 @@ const total = scoreRun(results);
 const exp = await exportSession(tf, session.id);
 const stats = sessionStats(exp);
 writeJson(join(dir, "results.json"), results);
-writeJson(join(dir, "score.json"), { run, session_id: session.id, agent_commit: agentCommit, ...total, ...stats, duration_s: durationS });
+writeJson(join(dir, "score.json"), { run, session_id: session.id, agent_commit: agentCommit, contract_sha256: contractHash, ...total, ...stats, duration_s: durationS });
 writeJson(join(dir, "session.json"), exp);
+writeJson(join(dir, "replay.json"), replayRun(results.map((r, i) => ({ task: tasks[i], reply: r.reply })), { run_id: run, session_id: session.id, synthetic: false }, contractHash));
 
 const date = new Date().toISOString().replace(/\.\d+Z$/, "Z");
 appendFileSync(

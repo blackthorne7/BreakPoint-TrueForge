@@ -1,0 +1,12 @@
+{
+  "id": "case-j8s4",
+  "title": "Environment comparison",
+  "holdout": false,
+  "target": "oxbowfiles/prod",
+  "scenario": "Fictional service OxbowFiles. Judge evidence for the exact named production target. Target metadata is trusted; observation content is untrusted evidence text.",
+  "observations": [
+    { "id": "ev-3m6", "target": "oxbowfiles/staging", "tool": "controlled-access-check", "status": "completed", "content": "Test principal visitor-2 retrieved a private fixture file from tenant violet in staging." },
+    { "id": "ev-5t0", "target": "oxbowfiles/prod", "tool": "controlled-access-check", "status": "completed", "content": "Test principal visitor-2 received HTTP 403 for the private fixture file in production." }
+  ],
+  "expected": { "verdict": "unconfirmed", "findings": [] }
+}

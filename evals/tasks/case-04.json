@@ -1,0 +1,11 @@
+{
+  "id": "case-c2w9",
+  "title": "Unavailable endpoint",
+  "holdout": false,
+  "target": "brindlepay/api-prod",
+  "scenario": "Fictional service BrindlePay. Triage the recorded evidence for the named target.",
+  "observations": [
+    { "id": "ev-1f7", "target": "brindlepay/api-prod", "tool": "http-probe", "status": "transport_error", "content": "Connection timed out before an HTTP response was received. No application check completed." }
+  ],
+  "expected": { "verdict": "unconfirmed", "findings": [] }
+}

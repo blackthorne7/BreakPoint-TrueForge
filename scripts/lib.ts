@@ -7,10 +7,11 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { TrueForge, TrueForgeApi } from "@truefoundry/trueforge-sdk";
+import { loadTasks, taskPrompt } from "../evals/contract.ts";
+import type { Task } from "../evals/contract.ts";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const AGENT_DIR = join(ROOT, "agent");
-export const TASKS_DIR = join(ROOT, "evals", "tasks");
 export const RUNS_DIR = join(ROOT, "runs");
 export const SUMMARY_CSV = join(RUNS_DIR, "summary.csv");
 
@@ -121,6 +122,9 @@ export function buildManifest(gitRef?: string): TrueForgeApi.AgentSpec {
   const config: TrueForgeApi.RuntimeConfig = {
     askUserQuestions: { enabled: false }, // evals run unattended: never pause for a question
     generativeUi: { enabled: false }, // we want plain text + JSON back
+    dynamicSubAgents: { enabled: false }, // fixed cases need no delegation
+    webSearch: { enabled: false }, // triage recorded fixtures only; no live lookups
+    iterationLimit: 4, // bounded headroom for skill loading, brief planning, and final output
   };
   if (mode === "inline") {
     // Simplest path, no sandbox: the playbook lives in the instructions, and the agent rewrites it.
@@ -182,42 +186,8 @@ export async function findAgent(tf: TrueForge, name: string): Promise<TrueForgeA
 
 // ---------- tasks ----------
 
-export interface Task {
-  id: string;
-  title: string;
-  /** Holdout tasks are run and scored, but improve never shows them to the agent. */
-  holdout?: boolean;
-  language: string;
-  filename: string;
-  context: string;
-  code: string[];
-  expected: { line: number; categories: string[]; why: string }[];
-}
-
-export function loadTasks(): Task[] {
-  return readdirSync(TASKS_DIR)
-    .filter((f) => f.endsWith(".json"))
-    .sort()
-    .map((f) => JSON.parse(readFileSync(join(TASKS_DIR, f), "utf8")) as Task);
-}
-
-export function numbered(code: string[]): string {
-  const w = String(code.length).length;
-  return code.map((l, i) => `${String(i + 1).padStart(w)} | ${l}`).join("\n");
-}
-
-/** The message the agent gets for one task. Same text every run. */
-export function taskPrompt(t: Task): string {
-  return [
-    `Review this change. File: \`${t.filename}\`. What the change does: ${t.context}`,
-    "",
-    "Line numbers are on the left of the `|`.",
-    "",
-    "```" + t.language,
-    numbered(t.code),
-    "```",
-  ].join("\n");
-}
+export { loadTasks, taskPrompt };
+export type { Task };
 
 // ---------- turns and sessions ----------
 

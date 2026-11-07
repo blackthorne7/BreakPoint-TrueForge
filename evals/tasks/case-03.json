@@ -1,0 +1,12 @@
+{
+  "id": "case-r5n1",
+  "title": "Search input handling",
+  "holdout": false,
+  "target": "cedarcatalog/search-prod",
+  "scenario": "Fictional service CedarCatalog. Review the completed controlled observations for the named target.",
+  "observations": [
+    { "id": "ev-6c2", "target": "cedarcatalog/search-prod", "tool": "query-binding-check", "status": "completed", "content": "The request value `x' OR 'x'='x` was sent. The server recorded it as one bound parameter; the SQL statement shape remained unchanged." },
+    { "id": "ev-8h4", "target": "cedarcatalog/search-prod", "tool": "result-comparison", "status": "completed", "content": "Ordinary and metacharacter search requests returned only their expected matching fixture rows. No broadened result set was observed." }
+  ],
+  "expected": { "verdict": "unconfirmed", "findings": [] }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "case-k7m2",
+  "title": "Recorded record lookup",
+  "holdout": false,
+  "target": "latticenote/api-prod",
+  "scenario": "Fictional service LatticeNote. Assess only whether the supplied recorded evidence supports a security finding for the named target.",
+  "observations": [
+    { "id": "ev-4q1", "target": "latticenote/api-prod", "tool": "access-policy-record", "status": "completed", "content": "Fixture policy: principal guest-17 belongs to tenant blue and may read only blue records. Record R-204 belongs to tenant amber and is marked private." },
+    { "id": "ev-9p3", "target": "latticenote/api-prod", "tool": "request-capture", "status": "completed", "content": "Completed request req-33 used guest-17 credentials and requested record R-204." },
+    { "id": "ev-2k5", "target": "latticenote/api-prod", "tool": "response-capture", "status": "completed", "content": "Response for req-33 was HTTP 200 and contained the exact private body marker AMBER-PRIVATE-91." }
+  ],
+  "expected": { "verdict": "confirmed_vulnerable", "findings": [{ "category": "access-control", "evidence_ids": ["ev-2k5", "ev-4q1", "ev-9p3"], "why": "A tenant-blue principal received a private tenant-amber record despite the fixture policy." }] }
+}

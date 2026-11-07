@@ -13,7 +13,10 @@
     "run-evals": "tsx scripts/run-evals.ts",
     "improve": "tsx scripts/improve.ts",
     "export-session": "tsx scripts/export-session.ts",
-    "score": "tsx evals/score.ts",
+    "score": "node --import tsx evals/score.ts",
+    "evals:validate": "node --import tsx evals/validate.ts",
+    "evals:test": "node --import tsx --test evals/security-foundation.test.ts",
+    "replay:example": "node --import tsx scripts/export-replay-example.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "run_id": null,
+  "session_id": null,
+  "synthetic": true,
+  "contract_sha256": "2db044ebf3b426a7bcd10bcc47a3b3ade9c158a60efed8a7c66b185ce5c0b322",
+  "summary": {
+    "score": 100,
+    "tasks_passed": 1,
+    "tasks_total": 1
+  },
+  "tasks": [
+    {
+      "schema_version": "1.0",
+      "run_id": null,
+      "session_id": null,
+      "synthetic": true,
+      "task": {
+        "id": "case-p6a3",
+        "title": "Mixed gateway observations",
+        "target": "copperfield/gateway-prod",
+        "scenario": "Fictional service Copperfield. Assess each completed observation only for the exact target named here.",
+        "observations": [
+          {
+            "id": "ev-8n2",
+            "target": "copperfield/gateway-prod",
+            "tool": "controlled-query-check",
+            "status": "completed",
+            "content": "A controlled quote-based input changed the fixture query result from one matching row to all 24 rows. The captured query showed the input was concatenated into the filter expression."
+          },
+          {
+            "id": "ev-3r7",
+            "target": "copperfield/gateway-prod",
+            "tool": "public-route-check",
+            "status": "completed",
+            "content": "Anonymous GET /internal/manifest returned HTTP 200 with the exact private deployment key marker COPPER-KEY-71. Fixture policy labels this route and key private."
+          },
+          {
+            "id": "ev-1u4",
+            "target": "copperfield/gateway-prod",
+            "tool": "banner-reader",
+            "status": "completed",
+            "content": "Header reports Copperfield Gateway 2.0. No version advisory check is included."
+          }
+        ]
+      },
+      "parsed_answer": {
+        "verdict": "confirmed_vulnerable",
+        "findings": [
+          {
+            "category": "injection",
+            "evidence_ids": [
+              "ev-8n2"
+            ],
+            "explanation": "Controlled input altered query structure and broadened results."
+          },
+          {
+            "category": "data-exposure",
+            "evidence_ids": [
+              "ev-3r7"
+            ],
+            "explanation": "An anonymous request returned a deployment key marked private by the fixture."
+          }
+        ]
+      },
+      "scoring": {
+        "score": 1,
+        "passed": true,
+        "parsed": true,
+        "verdict_correct": true,
+        "precision": 1,
+        "recall": 1,
+        "finding_f1": 1,
+        "matched_count": 2,
+        "missed_count": 0,
+        "noise_count": 0,
+        "error": null,
+        "matched": [
+          {
+            "category": "injection",
+            "evidence_ids": [
+              "ev-8n2"
+            ],
+            "expected_reason": "Controlled input altered query structure and broadened results.",
+            "actual": {
+              "category": "injection",
+              "evidence_ids": [
+                "ev-8n2"
+              ],
+              "explanation": "Controlled input altered query structure and broadened results."
+            }
+          },
+          {
+            "category": "data-exposure",
+            "evidence_ids": [
+              "ev-3r7"
+            ],
+            "expected_reason": "An anonymous request returned a deployment key marked private by the fixture.",
+            "actual": {
+              "category": "data-exposure",
+              "evidence_ids": [
+                "ev-3r7"
+              ],
+              "explanation": "An anonymous request returned a deployment key marked private by the fixture."
+            }
+          }
+        ],
+        "missed": [],
+        "noise": []
+      }
+    }
+  ]
+}

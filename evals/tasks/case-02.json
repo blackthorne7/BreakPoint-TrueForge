@@ -1,0 +1,11 @@
+{
+  "id": "case-v3d8",
+  "title": "Service identification header",
+  "holdout": false,
+  "target": "micaqueue/edge-prod",
+  "scenario": "Fictional service MicaQueue. Decide whether these observations establish a vulnerability on the named target.",
+  "observations": [
+    { "id": "ev-2b8", "target": "micaqueue/edge-prod", "tool": "banner-reader", "status": "completed", "content": "HTTP response header: Server: MicaQueue/7.4. No advisory lookup or exploitability check is included in this fixture." }
+  ],
+  "expected": { "verdict": "unconfirmed", "findings": [] }
+}
