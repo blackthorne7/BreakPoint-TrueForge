@@ -9,6 +9,8 @@
     "node": ">=22.14"
   },
   "scripts": {
+    "demo": "node scripts/serve-demo.mjs",
+    "demo:test": "node --import tsx demo/demo.test.mjs",
     "setup": "tsx scripts/setup.ts",
     "run-evals": "tsx scripts/run-evals.ts",
     "improve": "tsx scripts/improve.ts",

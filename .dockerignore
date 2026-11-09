@@ -1,0 +1,35 @@
+# Ignore everything by default; re-include only the reviewed demo runtime and public evidence.
+**
+!.dockerignore
+!Dockerfile
+!Kraftfile
+!demo/
+!demo/index.html
+!demo/styles.css
+!demo/app.js
+!demo/data.mjs
+!scripts/
+scripts/*
+!scripts/serve-demo.mjs
+!runs/
+!runs/run-01/
+!runs/run-01/replay.json
+!runs/run-01/score.json
+!runs/run-01/results.json
+!examples/
+!examples/replay-synthetic.json
+!examples/replay-partial-synthetic.json
+
+# Keep credentials, local state, private sources, session exports, and setup notes excluded.
+.env
+.env.*
+.local
+**/.local
+.git
+**/.git
+node_modules
+**/node_modules
+agent/**
+evals/**
+*SETUP.md
+**/session.json

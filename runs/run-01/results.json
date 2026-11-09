@@ -1,0 +1,192 @@
+[
+  {
+    "task_id": "case-k7m2",
+    "score": 1,
+    "passed": true,
+    "parsed": true,
+    "verdict_correct": true,
+    "verdict_score": 1,
+    "precision": 1,
+    "recall": 1,
+    "finding_f1": 1,
+    "matches": [
+      {
+        "expected": {
+          "category": "access-control",
+          "evidence_ids": [
+            "ev-2k5",
+            "ev-4q1",
+            "ev-9p3"
+          ],
+          "why": "A tenant-blue principal received a private tenant-amber record despite the fixture policy."
+        },
+        "actual": {
+          "category": "access-control",
+          "evidence_ids": [
+            "ev-4q1",
+            "ev-9p3",
+            "ev-2k5"
+          ],
+          "explanation": "The blue-tenant guest received the private amber record body despite being permitted to read only blue records."
+        }
+      }
+    ],
+    "missed": [],
+    "noise": [],
+    "turn_id": "01m6t2p7kefwwpkzxwpj3kegrg",
+    "status": "done",
+    "reply": "{\"verdict\":\"confirmed_vulnerable\",\"findings\":[{\"category\":\"access-control\",\"evidence_ids\":[\"ev-4q1\",\"ev-9p3\",\"ev-2k5\"],\"explanation\":\"The blue-tenant guest received the private amber record body despite being permitted to read only blue records.\"}]}"
+  },
+  {
+    "task_id": "case-v3d8",
+    "score": 1,
+    "passed": true,
+    "parsed": true,
+    "verdict_correct": true,
+    "verdict_score": 1,
+    "precision": 1,
+    "recall": 1,
+    "finding_f1": 1,
+    "matches": [],
+    "missed": [],
+    "noise": [],
+    "turn_id": "01m6t2pp3r573dceajnsnrmv5b",
+    "status": "done",
+    "reply": "{\"verdict\":\"unconfirmed\",\"findings\":[]}"
+  },
+  {
+    "task_id": "case-r5n1",
+    "score": 1,
+    "passed": true,
+    "parsed": true,
+    "verdict_correct": true,
+    "verdict_score": 1,
+    "precision": 1,
+    "recall": 1,
+    "finding_f1": 1,
+    "matches": [],
+    "missed": [],
+    "noise": [],
+    "turn_id": "01m6t2q4c0fdncpta735p1gm89",
+    "status": "done",
+    "reply": "{\"verdict\":\"unconfirmed\",\"findings\":[]}"
+  },
+  {
+    "task_id": "case-c2w9",
+    "score": 1,
+    "passed": true,
+    "parsed": true,
+    "verdict_correct": true,
+    "verdict_score": 1,
+    "precision": 1,
+    "recall": 1,
+    "finding_f1": 1,
+    "matches": [],
+    "missed": [],
+    "noise": [],
+    "turn_id": "01m6t2qt4yhdnwv22rmm9p9de5",
+    "status": "done",
+    "reply": "{\"verdict\":\"unconfirmed\",\"findings\":[]}"
+  },
+  {
+    "task_id": "case-j8s4",
+    "score": 1,
+    "passed": true,
+    "parsed": true,
+    "verdict_correct": true,
+    "verdict_score": 1,
+    "precision": 1,
+    "recall": 1,
+    "finding_f1": 1,
+    "matches": [],
+    "missed": [],
+    "noise": [],
+    "turn_id": "01m6t2r76e5skqsqyq9cvfspg9",
+    "status": "done",
+    "reply": "{\"verdict\":\"unconfirmed\",\"findings\":[]}"
+  },
+  {
+    "task_id": "case-b4x6",
+    "score": 1,
+    "passed": true,
+    "parsed": true,
+    "verdict_correct": true,
+    "verdict_score": 1,
+    "precision": 1,
+    "recall": 1,
+    "finding_f1": 1,
+    "matches": [
+      {
+        "expected": {
+          "category": "data-exposure",
+          "evidence_ids": [
+            "ev-7d9"
+          ],
+          "why": "An unauthenticated public download returned a credential explicitly marked non-public by the fixture policy."
+        },
+        "actual": {
+          "category": "data-exposure",
+          "evidence_ids": [
+            "ev-7d9"
+          ],
+          "explanation": "A completed check found the private credential marker in an unauthenticated download from the public export endpoint."
+        }
+      }
+    ],
+    "missed": [],
+    "noise": [],
+    "turn_id": "01m6t2rkxy9vtmg4jszzrgxs6e",
+    "status": "done",
+    "reply": "{\"verdict\":\"confirmed_vulnerable\",\"findings\":[{\"category\":\"data-exposure\",\"evidence_ids\":[\"ev-7d9\"],\"explanation\":\"A completed check found the private credential marker in an unauthenticated download from the public export endpoint.\"}]}"
+  },
+  {
+    "task_id": "case-p6a3",
+    "score": 1,
+    "passed": true,
+    "parsed": true,
+    "verdict_correct": true,
+    "verdict_score": 1,
+    "precision": 1,
+    "recall": 1,
+    "finding_f1": 1,
+    "matches": [
+      {
+        "expected": {
+          "category": "injection",
+          "evidence_ids": [
+            "ev-8n2"
+          ],
+          "why": "Controlled input altered query structure and broadened results."
+        },
+        "actual": {
+          "category": "injection",
+          "evidence_ids": [
+            "ev-8n2"
+          ],
+          "explanation": "Controlled input altered the query result, and the captured query shows input concatenated into the filter expression."
+        }
+      },
+      {
+        "expected": {
+          "category": "data-exposure",
+          "evidence_ids": [
+            "ev-3r7"
+          ],
+          "why": "An anonymous request returned a deployment key marked private by the fixture."
+        },
+        "actual": {
+          "category": "data-exposure",
+          "evidence_ids": [
+            "ev-3r7"
+          ],
+          "explanation": "An anonymous request to a public route returned a private deployment key marker."
+        }
+      }
+    ],
+    "missed": [],
+    "noise": [],
+    "turn_id": "01m6t2s0qy56av0fdw9k8bj9db",
+    "status": "done",
+    "reply": "{\"verdict\":\"confirmed_vulnerable\",\"findings\":[{\"category\":\"injection\",\"evidence_ids\":[\"ev-8n2\"],\"explanation\":\"Controlled input altered the query result, and the captured query shows input concatenated into the filter expression.\"},{\"category\":\"data-exposure\",\"evidence_ids\":[\"ev-3r7\"],\"explanation\":\"An anonymous request to a public route returned a private deployment key marker.\"}]}"
+  }
+]

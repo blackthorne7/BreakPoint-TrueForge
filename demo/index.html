@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101820">
+  <title>BreakPoint — Evidence Console</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#overview" aria-label="BreakPoint overview">
+      <svg class="brand-mark" viewBox="0 0 36 36" aria-hidden="true"><path d="M14 5H7v10l5 3-5 3v10h7M22 5h7v10l-5 3 5 3v10h-7"/><path d="M18 12v12M12 18h12"/></svg>
+      <span>BREAK<span class="brand-light">POINT</span></span>
+    </a>
+    <nav class="topnav" aria-label="Page sections"><a href="#overview">Overview</a><a href="#evidence">Evidence</a><a href="#comparison">Comparison</a></nav>
+    <div class="header-state"><span class="state-dot"></span><span>EVIDENCE CONSOLE</span></div>
+  </header>
+
+  <main id="overview">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span> SECURITY DECISIONS · TRACEABLE EVIDENCE</div>
+        <h1>Every verdict<br><span>has a source.</span></h1>
+        <p class="hero-lede">Review how an agent classified recorded security evidence. These are fictional offline cases, not live scans. Follow each finding back to its supporting observation.</p>
+        <div class="source-row"><span class="source-pill"><i></i>RECORDED EVIDENCE</span><span id="source-label">MEASURED RUN</span></div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="orbit orbit-c"></div>
+        <div class="art-cross"><span></span><i></i></div><div class="art-label label-top">EVIDENCE / 01</div><div class="art-label label-bottom">TRACE STATUS <b>LINKED</b></div>
+        <div class="art-line art-line-1"></div><div class="art-line art-line-2"></div>
+      </div>
+    </section>
+
+    <section class="overview-panel panel" aria-labelledby="run-heading">
+      <div class="panel-head"><div><div class="section-kicker">RUN SNAPSHOT</div><h2 id="run-heading">Recorded performance</h2></div><div class="run-controls"><button id="example-mode" class="mode-button" type="button" hidden>View synthetic fixtures</button><label class="sr-only" for="run-select">Select run or synthetic fixture</label><select id="run-select" aria-label="Select run or synthetic fixture"></select><button class="icon-button" id="download-button" type="button" title="Download curated replay JSON" aria-label="Download curated replay JSON" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v10m0 0 4-4m-4 4L6 8M3 13v4h14v-4"/></svg></button></div></div>
+      <div id="overview-content" class="overview-content"><div class="loading">Loading recorded run…</div></div>
+    </section>
+
+    <section id="evidence" class="evidence-section" aria-labelledby="evidence-heading">
+      <div class="section-title-row"><div><div class="section-kicker">CASE FILES</div><h2 id="evidence-heading">Evidence review</h2><p>Choose a task, inspect the agent’s verdict, then trace every citation to its recorded observation.</p></div><div class="task-count" id="task-count">—</div></div>
+      <div class="evidence-layout">
+        <aside class="task-rail panel" aria-label="Task list">
+          <div class="task-tools"><label class="search-wrap"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><span class="sr-only">Search task cases</span><input id="task-search" type="search" placeholder="Search cases…" autocomplete="off"></label><div class="filter-tabs" role="group" aria-label="Filter tasks"><button type="button" data-filter="all" aria-pressed="true">All</button><button type="button" data-filter="passed" aria-pressed="false">Passed</button><button type="button" data-filter="review" aria-pressed="false">Review</button></div></div>
+          <div id="task-list" class="task-list" role="group" aria-label="Recorded task cases"></div>
+          <div id="task-empty" class="empty-state" hidden>No cases match this search. Try another term or filter.</div>
+        </aside>
+        <article id="task-detail" class="task-detail panel" aria-live="polite"><div class="loading">Loading task evidence…</div></article>
+      </div>
+    </section>
+
+    <section id="comparison" class="comparison-panel panel" aria-labelledby="comparison-heading">
+      <div class="panel-head"><div><div class="section-kicker">EXPERIMENT TRACKER</div><h2 id="comparison-heading">Run-to-run comparison</h2></div><span id="comparison-status" class="status-tag status-waiting">AWAITING LATER RUN</span></div>
+      <div id="comparison-content"></div>
+    </section>
+
+    <section class="lower-grid">
+      <details class="diagnostics panel" id="diagnostics"><summary><span><span class="section-kicker">SCORER DIAGNOSTICS</span><strong>How this answer was scored</strong></span><span class="disclosure">+</span></summary><div class="diagnostics-body" id="diagnostics-body"></div></details>
+      <section class="change-panel panel"><div class="section-kicker">AGENT REVISION</div><h2>What changed?</h2><div id="revision-content" class="empty-change"><span class="empty-change-mark">↗</span><div><strong>No agent-authored revision recorded</strong><p>There is no later run or revision in this evidence set yet.</p></div></div></section>
+    </section>
+    <footer><span>BREAKPOINT <i>·</i> EVIDENCE CONSOLE</span><span>Offline replay · fictional cases · no live scanning</span></footer>
+  </main>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

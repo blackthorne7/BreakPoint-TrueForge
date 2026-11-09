@@ -13,21 +13,11 @@ The example agent triages **recorded security evidence** in seven compact, ficti
 
 ## Run 1 vs run N
 
-> Fill this in at the end. Five lines max. Keep the heading: the challenge checks for it.
-
 - **Task and score:** Triage seven fictional recorded-evidence cases. Wrong verdict scores 0; correct verdict scores 0.4 + 0.6 × exact category/citation-set F1. Pass requires exact verdict and finding set.
-- **Run 1 → run N:** _not measured; no official evaluation has run._
-- **The change that did it:** _link to the commit with `Agent-Session:`._
-- **What the agent learned:** _not measured._
-- **What still fails:** _not measured; the sixth fixture is held out from improvement._
-
-## Shelled handoff
-
-The replay artifacts and stable schema for the Shelled UI are here:
-
-- [Replay contract](docs/replay-contract.md)
-- [Synthetic perfect example](examples/replay-synthetic.json)
-- [Synthetic partial example](examples/replay-partial-synthetic.json)
+- **Run 1 → run N:** Run 1 scored **100/100 (7/7 passed, including the holdout)**; no later run has been made.
+- **The change that did it:** No self-change or improvement cycle has been demonstrated. Run 1 used agent commit `1d60a7bfc77622fa780e88df471e5d5d76de2c99` (session `01m6t2p7k0kp4qg3ztpfjkxss2`).
+- **What the agent learned:** Nothing has been established through run-to-run comparison; every case already passed on run 1.
+- **What still fails:** The score has an accuracy ceiling and only checks structured verdicts, categories, and citations; no gain is proven. Do not run `improve` on this all-passed set; redesigning tasks requires a separately versioned experiment.
 
 ## What the challenge asks
 
@@ -60,6 +50,9 @@ scripts/
   lib.ts                          shared helpers (TrueForge SDK client, git, files)
 runs/summary.csv                  one row per run
 examples/replay-*.json            clearly marked synthetic UI examples, generated through the scorer
+demo/                             replay-only evidence console
+Dockerfile, Kraftfile              local container and Unikraft deployment definitions
+docs/demo.md, docs/deployment.md   console and deployment notes
 ```
 
 ## Quickstart (about 5 minutes)
@@ -80,8 +73,9 @@ Open http://localhost:8790 → **Settings → Models** → pick your provider �
 
 ```bash
 npm install
-# Set TF_MODEL and SKILL_REPO_URL in your ignored .env file.
-# If .env already exists, edit it in place; do not replace it.
+cp .env.example .env
+# Set TF_MODEL=provider/model in the ignored .env file.
+# For git-backed skills, also set SKILL_REPO_URL to your public repository URL.
 ```
 
 **3. Create the agent:**
@@ -156,6 +150,8 @@ Score formula: a wrong verdict earns zero. A correct verdict earns `0.4 + 0.6 ×
 
 See [docs/replay-contract.md](docs/replay-contract.md) for the replay JSON schema and field meanings.
 
+Review saved results locally with the [BreakPoint evidence console](docs/demo.md) (`npm run demo`), or open the [live evidence console](https://breakpoint.sfo.unikraft.app/). See [deployment notes](docs/deployment.md) for Docker and Unikraft.
+
 ## Make it yours
 
 Pick your task and your scorer **before run 1**; after run 1 they're frozen.
@@ -180,6 +176,15 @@ Some ideas from the challenge brief: a PR reviewer that sharpens its checklist; 
 
 The challenge asks you to use **two or more** of: skills, subagents, MCP tools, the sandbox, schedules, human checkpoints, the SDK. This starter already uses the SDK; `git` mode adds skills and the sandbox. Subagents are on by default in TrueForge agents.
 
+### Local or open models
+
+Any OpenAI-compatible endpoint works as a `custom` provider (**Settings → Models → Add custom provider**). If it runs on your own machine (Ollama, vLLM, LM Studio), TrueForge blocks private addresses by default; start it with your host allowed:
+
+```bash
+OUTBOUND_URL_ALLOWED_HOSTS='["127.0.0.1"]' npx @truefoundry/trueforge@latest
+```
+
+and use `http://127.0.0.1:<port>/v1` as the base URL.
 
 ## What the judges check
 
@@ -189,7 +194,7 @@ Automatically, for everyone:
 - `summary.csv` has 2+ runs, and a later run scores higher than run 1;
 - a commit that changes `agent/` and ends with `Agent-Session:` comes after run 1's commit and before the later run's.
 
-For finalists, judges look deeper: they open the sessions (`runs/run-NN/session.json`), the diffs and the scorer, and may ask you to run it again live. Keep it honest: same tasks, same scorer, every run.
+For finalists, judges look deeper: they open the sessions (`runs/run-NN/session.json`), the diffs and the scorer, and may ask you to run it again live. Keep it honest: same tasks, same scorer, every run. The published evidence bundle and deployment image intentionally omit the full session export and any configured model-provider integration; this is not a complete judge artifact yet.
 
 You also send: a video (up to 2 minutes), three lines (what it does, how it uses TrueForge, what it learned), and a half-page feedback note on TrueForge.
 
@@ -202,11 +207,11 @@ You also send: a video (up to 2 minutes), three lines (what it does, how it uses
 - **`skills require a sandbox provider`** in `git` mode: see *Skills and the sandbox*.
 - **The model rejects `temperature`** (some reasoning models do): remove `params` in `agent/agent.json`.
 
-## Configuration and status
+## Current status
 
-Choose a model already configured in TrueForge and set `TF_MODEL` to its exact `provider/model` name. Set `SKILL_REPO_URL` to the public repository URL required for git-backed skills. Both values belong in the ignored `.env` file. If `.env` already exists, edit it in place and preserve its other values.
+The public evidence set includes official run 1 with a score of 100/100 (7/7 cases passed, including the holdout). It used contract fingerprint `2db044ebf3b426a7bcd10bcc47a3b3ade9c158a60efed8a7c66b185ce5c0b322`, agent commit `1d60a7bfc77622fa780e88df471e5d5d76de2c99`, and TrueForge session `01m6t2p7k0kp4qg3ztpfjkxss2`. The 14 model requests reported 41,175 tokens (39,961 input and 1,214 output) over 113 seconds. This was an authorized 40,000-token soft limit: the final response overshot it by 1,175 tokens, then inference stopped. Full-stream and turn usage matched and rescoring returned 100. The published console includes replay, score, and task results, but intentionally omits the full session export and configured model-provider integration.
 
-The task/scorer/replay foundation has offline validation and tests. It has **not** run an official security-evidence evaluation or an improvement cycle; there is no measured before/after score. Git-backed skills also require a working TrueForge sandbox.
+No improvement has been demonstrated, and all seven tasks already pass, so there is no meaningful reason to run `improve` against this task set. Preserve this baseline; any task or objective redesign should be a separately versioned experiment with its own baseline. The scorer checks structured verdicts, categories, and citation sets, not free-text truth or general security skill. Schedule-based evaluation is out of scope for this foundation.
 
 ## Contributing
 

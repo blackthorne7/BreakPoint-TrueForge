@@ -1,0 +1,24 @@
+{
+  "run": 1,
+  "session_id": "01m6t2p7k0kp4qg3ztpfjkxss2",
+  "agent_commit": "1d60a7bfc77622fa780e88df471e5d5d76de2c99",
+  "contract_sha256": "2db044ebf3b426a7bcd10bcc47a3b3ade9c158a60efed8a7c66b185ce5c0b322",
+  "controller_sha256": "caa184c139dce30187b0a1e540fd42fc85fa7291a470fd60957bae0bc26ff229",
+  "run_kind": "local-soft-budget-baseline",
+  "token_budget": {
+    "kind": "soft",
+    "limit": 40000,
+    "observed": 41175,
+    "overshoot": 1175
+  },
+  "turn_metrics_crosscheck": {
+    "status": "matched",
+    "turnTokens": 41175
+  },
+  "score": 100,
+  "tasks_passed": 7,
+  "tasks_total": 7,
+  "tokens": 41175,
+  "toolCalls": 7,
+  "duration_s": 113
+}
