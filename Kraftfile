@@ -9,4 +9,4 @@ rootfs:
   source: ./Dockerfile
   format: erofs
 
-cmd: ["node", "scripts/serve-demo.mjs", "--host", "0.0.0.0", "--port", "8080"]
+cmd: ["node", "/app/scripts/serve-demo.mjs", "--host", "0.0.0.0", "--port", "8080"]
